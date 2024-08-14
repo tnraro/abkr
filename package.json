@@ -1,0 +1,16 @@
+{
+  "name": "abkr",
+  "module": "index.ts",
+  "type": "module",
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/papaparse": "^5.3.14"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "deepl-node": "^1.13.0",
+    "papaparse": "^5.4.1"
+  }
+}

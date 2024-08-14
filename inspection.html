@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    .text {
+      font: unset;
+      padding: 0.5rem;
+      margin: 0;
+      border: none;
+      min-height: 3rem;
+      line-height: 1.8;
+    }
+
+    .inspection-level {
+      display: inline-block;
+      border-radius: 1rem;
+      width: 0.75rem;
+      height: 0.75rem;
+      background: gainsboro;
+      margin-right: 0.5rem;
+    }
+
+    .inspection-level--1 {
+      background: orangered;
+    }
+
+    .inspection-level--2 {
+      background: yellow;
+    }
+
+    .inspection-level--3 {
+      background: green;
+    }
+
+    #target {
+      field-sizing: content;
+    }
+
+    #form {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+    }
+  </style>
+</head>
+
+<body>
+  <button id="prev">prev</button>
+  <button id="next">next</button>
+  <div><span id="inspection-level"></span><span id="cursor"></span><button id="mark-as-error">mark as error</button>
+    <button id="prev-error">prev error</button>
+    <button id="next-error">next error</button>
+  </div>
+  <form id="form">
+    <div class="grid-2">
+      <textarea class="text" id="source" disabled></textarea>
+      <textarea class="text" id="target" name="target"></textarea>
+    </div>
+    <input type="hidden" id="source-value" name="source" />
+    <button>submit</button>
+  </form>
+  <script type="module">
+    $("#form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const fd = new FormData(e.currentTarget);
+      const source = fd.get("source");
+      const target = fd.get("target");
+      console.log(source);
+
+      await setRow(source, target);
+    });
+    $("#prev").addEventListener("click", decrease);
+    $("#next").addEventListener("click", increase);
+    $("#prev-error").addEventListener("click", async () => {
+      setCursor(await getError(cursor, "prev"))
+    });
+    $("#next-error").addEventListener("click", async () => {
+      setCursor(await getError(cursor, "next"))
+    });
+    $("#mark-as-error").addEventListener("click", () => setRow(data?.source, data?.target, 1))
+    let cursor = Number(localStorage.getItem("abkr-inspection-cursor") ?? 1);
+    let data;
+    function decrease() {
+      return setCursor(cursor - 1)
+    }
+    function increase() {
+      return setCursor(cursor + 1)
+    }
+    async function setCursor(value) {
+      cursor = value;
+      await updateData();
+      localStorage.setItem("abkr-inspection-cursor", cursor);
+    }
+
+    function render() {
+      $("#source").textContent = data?.source;
+      $("#source-value").value = data?.source;
+      $("#target").value = data?.target;
+      $("#inspection-level").className = `inspection-level inspection-level--${data?.inspection}`;
+      $("#cursor").textContent = cursor;
+    }
+
+    let scheduled = false;
+    function schedule() {
+      if (scheduled) return;
+      scheduled = true
+      setTimeout(() => {
+        render();
+        scheduled = false;
+      });
+    }
+
+    function $(x) {
+      return document.querySelector(x);
+    }
+
+    async function getError(i, d) {
+      const res = await fetch(`/api/data/error?i=${i}&d=${d}`);
+      if (!res.ok) throw res;
+      return await res.json();
+    }
+
+    async function getData(i) {
+      const res = await fetch(`/api/data?i=${i}`);
+      if (!res.ok) throw res;
+      return await res.json();
+    }
+
+    async function setRow(source, target, inspection = 3) {
+      const res = await fetch("/api/data", {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ source, target, inspection }),
+      });
+      if (!res.ok) throw res;
+      await updateData()
+      return;
+    }
+    await setCursor(cursor);
+    async function updateData() {
+      data = await getData(cursor);
+      schedule();
+    }
+  </script>
+</body>
+
+</html>
