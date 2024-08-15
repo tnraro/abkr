@@ -1,18 +1,7 @@
-import { Database } from "bun:sqlite";
-import { join } from "node:path";
+import { createDatabase, type CacheSelect, type CacheUpdate } from "./src/db";
 
-using db = new Database(join(import.meta.dir, "data/cache.sqlite"), { strict: true });
+using db = createDatabase();
 
-type CacheUpdate = {
-  source: string;
-  target: string;
-  inspection: number;
-}
-type CacheSelect = {
-  source: string;
-  target: string;
-  inspection: number
-}
 using update = db.query<void, CacheUpdate>(`update cache set target=$target, inspection=$inspection where source=$source`)
 using selectAll = db.query<CacheSelect, []>("select * from cache");
 

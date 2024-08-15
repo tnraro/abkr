@@ -1,27 +1,10 @@
-import { $, env, file, write } from "bun";
-import { join } from "node:path"
-import { parse, unparse } from "papaparse";
+import { env, file, write } from "bun";
 import { Translator } from "deepl-node";
-import { Database } from "bun:sqlite";
+import { join } from "node:path";
+import { parse, unparse } from "papaparse";
+import { createDatabase, type CacheInsert, type CacheSelect } from "./src/db";
 
-const db = new Database(join(import.meta.dir, "data/cache.sqlite"), { strict: true });
-db.exec("PRAGMA journal_mode=WAL;");
-db.exec(`create table if not exists cache (
-  source text not null primary key,
-  target text not null,
-  inspection integer not null default 0
-) strict`);
-
-type CacheSelect = {
-  source: string;
-  target: string;
-  inspection: number;
-}
-type CacheInsert = {
-  source: string;
-  target: string;
-  inspection?: number;
-}
+using db = createDatabase();
 
 const insert = db.query<void, CacheInsert>(`insert into cache (source, target) values ($source, $target)`)
 const select = db.query<Pick<CacheSelect, "target">, { source: string }>(`select target from cache where source = $source`);

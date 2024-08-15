@@ -1,4 +1,3 @@
-import { Database } from "bun:sqlite";
-import { join } from "node:path";
+import { createDatabase } from "./src/db";
 
-using db = new Database(join(import.meta.dir, "data/cache.sqlite"), { strict: true });
+using db = createDatabase();

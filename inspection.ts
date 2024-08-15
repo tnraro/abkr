@@ -1,19 +1,9 @@
 import { file, serve } from "bun";
-import { Database } from "bun:sqlite";
 import { join } from "node:path";
+import { createDatabase, type CacheSelect, type CacheUpdate } from "./src/db";
 
-const db = new Database(join(import.meta.dir, "data/cache.sqlite"), { strict: true });
+using db = createDatabase();
 
-type CacheUpdate = {
-  source: string;
-  target: string;
-  inspection: number;
-}
-type CacheSelect = {
-  source: string;
-  target: string;
-  inspection: number
-}
 const update = db.query<void, CacheUpdate>(`update cache set target=$target, inspection=$inspection where source=$source`)
 const select = db.query<CacheSelect, { i: number }>(`select * from cache where rowid = $i`);
 const selectErrorPrev = db.query<{ i: number }, { i: number }>("select max(rowid) as i from cache where (inspection=1 or inspection=2) and rowid < $i");
