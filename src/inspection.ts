@@ -1,6 +1,6 @@
 import { file, serve } from "bun";
 import { join } from "node:path";
-import { createDatabase, type CacheSelect, type CacheUpdate } from "./src/db";
+import { createDatabase, type CacheSelect, type CacheUpdate } from "./db";
 
 using db = createDatabase();
 
@@ -13,7 +13,7 @@ serve({
   async fetch(req) {
     const url = new URL(req.url)
     if (req.method === "GET" && url.pathname === "/") {
-      return new Response(file("inspection.html"));
+      return new Response(file(join(import.meta.dir, "inspection.html")));
     }
     if (req.method === "GET" && url.pathname === "/api/data") {
       const i = Number(url.searchParams.get("i"));

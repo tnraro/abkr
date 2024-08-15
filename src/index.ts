@@ -2,7 +2,7 @@ import { env, file, write } from "bun";
 import { Translator } from "deepl-node";
 import { join } from "node:path";
 import { parse, unparse } from "papaparse";
-import { createDatabase, type CacheInsert, type CacheSelect } from "./src/db";
+import { createDatabase, type CacheInsert, type CacheSelect } from "./db";
 
 using db = createDatabase();
 

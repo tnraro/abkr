@@ -1,4 +1,4 @@
-import { createDatabase, type CacheSelect, type CacheUpdate } from "./src/db";
+import { createDatabase, type CacheSelect, type CacheUpdate } from "./db";
 
 using db = createDatabase();
 
